@@ -4,15 +4,10 @@ import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.io.wavfile import read, write
 import io
-
-#AUDIO_FILE_URL = "https://file-examples.com/wp-content/uploads/2017/11/file_example_WAV_1MG.wav"
-
-
+import wave
 
 audio_file = st.file_uploader("Choose a File", type="wav")
 if audio_file is not None:
-	# st.write('Play original file')
-    # st.audio(audio_file)
     audio_bytes = audio_file.read()
     samplerate, sig = read(io.BytesIO(audio_bytes))
     sig = sig[:,0]
@@ -27,11 +22,11 @@ if audio_file is not None:
 
     f_orig, Pxx_den_orig = signal.periodogram(sig, fs=samplerate)
 
-    cutoff =  st.sidebar.slider("Cutoff frequency [Hz]", 1., 100., 50.)
+    cutoff =  st.sidebar.slider("Cutoff frequency [Hz]", 1., 10000., 500.)
     order =  st.sidebar.slider("Order: ", 1, 10, 3)
     
     
-    b, a = signal.butter(order, 1. / cutoff)
+    b, a = signal.butter(order, cutoff, 'lp', fs=samplerate)
 
     y = signal.filtfilt(b, a, sig)
     
@@ -46,16 +41,8 @@ if audio_file is not None:
     plt.semilogy(f_orig, Pxx_den_orig, f, Pxx_den)
     plt.legend(('Original', 'Filtered'), loc='best')
     plt.grid()
-    # plt.ylim([1e-7, 1e2])
     plt.xlabel('frequency [Hz]')
     plt.ylabel('PSD [V**2/Hz]')
     st.pyplot()
 
-#    #st.write(data)
-#    #st.audio(audio_file, format='audio/wav')
-#    freqs, times, spectrogram = signal.spectrogram(data[:,0])
-#    st.audio(data)
-#    plt.imshow(spectrogram, aspect='auto', cmap='hot_r', origin='lower')
-#    st.pyplot()
-#
-#
+
